@@ -33,7 +33,7 @@ Source: http://github.com/AdamFiser/siem_templates
   <!-- A1: Failed admin login -->
   <rule id="210101" level="9">
     <if_sid>210100</if_sid>
-    <field name="event">AdminUserLoginAttemptFailed</field>
+    <field name="data.event">AdminUserLoginAttemptFailed</field>
     <description>Workspace ONE: admin login failed</description>
     <group>authentication_failed,</group>
   </rule>
@@ -48,8 +48,16 @@ Source: http://github.com/AdamFiser/siem_templates
   <!-- A2: Successful admin login -->
   <rule id="210103" level="7">
     <if_sid>210100</if_sid>
-    <field name="event">AdminUserLoginSuccess</field>
+    <field name="data.event">AdminUserLoginSuccess</field>
     <description>Workspace ONE: admin login success</description>
+    <group>authentication_success,</group>
+  </rule>
+  
+  <!-- A2b: Successful admin login (variant in sample: AdminUserLoggedIn) -->
+  <rule id="210104" level="7">
+    <if_sid>210100</if_sid>
+    <field name="data.event">AdminUserLoggedIn</field>
+    <description>Workspace ONE: admin login success (LoggedIn)</description>
     <group>authentication_success,</group>
   </rule>
 
@@ -68,7 +76,7 @@ Source: http://github.com/AdamFiser/siem_templates
   <!-- B1: Change syslog settings -->
   <rule id="210210" level="8">
     <if_sid>210200</if_sid>
-    <field name="event">SyslogSettingChangedSuccess</field>
+    <field name="data.event">SyslogSettingChangedSuccess</field>
     <description>Workspace ONE: syslog settings changed</description>
     <group>configuration_change,</group>
   </rule>
@@ -76,8 +84,8 @@ Source: http://github.com/AdamFiser/siem_templates
   <!-- B2: Changing system settings from the console -->
   <rule id="210211" level="7">
     <if_sid>210200</if_sid>
-    <field name="event_category">SystemSettings</field>
-    <field name="event_type">Console</field>
+    <field name="data.event_category">SystemSettings</field>
+    <field name="data.event_type">Console</field>
     <description>Workspace ONE: system settings change from console</description>
     <group>configuration_change,</group>
   </rule>
@@ -85,7 +93,7 @@ Source: http://github.com/AdamFiser/siem_templates
   <!-- B3: Administration actions -->
   <rule id="210212" level="6">
     <if_sid>210200</if_sid>
-    <field name="event_module">Administration</field>
+    <field name="data.event_module">Administration</field>
     <description>Workspace ONE: action in Administration module</description>
     <group>audit,</group>
   </rule>
