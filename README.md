@@ -3,6 +3,23 @@
 This repository contains **templates, configurations, and rules** for the [Wazuh](https://wazuh.com) SIEM platform and similar systems.  
 The goal is to provide the community with a structured collection of **ready-to-use** configurations that make deployment, management, and security event detection easier.
 
+## What is SIEM?
+**SIEM** (Security Information and Event Management) is a solution that collects, analyzes, and correlates security-related data from multiple sources in real time.  
+It helps detect, investigate, and respond to security incidents while meeting **compliance requirements** such as:
+- **GDPR** (General Data Protection Regulation)
+- **NIS2 Directive** for network and information security
+- **ISO/IEC 27001** information security standards
+- Industry-specific regulations (e.g., PCI-DSS, HIPAA)
+
+A SIEM system is essential for organizations that need to maintain visibility into their IT environment, respond quickly to threats, and demonstrate compliance to auditors.
+
+---
+
+## About Wazuh
+**Wazuh** is an open-source SIEM platform built on top of the **Elastic Stack** (Elasticsearch, Logstash, Kibana).  
+This means it benefits from Elasticsearch's high-performance search and analytics capabilities, Logstash's data processing, and Kibana's visualization tools.  
+Wazuh extends these core technologies with advanced security monitoring, intrusion detection, log analysis, and compliance management features.
+
 ---
 
 ## 📂 Repository Structure
