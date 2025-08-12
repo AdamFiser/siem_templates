@@ -10,16 +10,14 @@ Source: http://github.com/AdamFiser/siem_templates
 Syslog format: RFC-5424
 Message tag: AirWatch
 Message Content:
-{"data":{"source":"WorkspaceONE","event_type":"{EventType}","event":"{Event}","user":"{User}","enrollment_user":"{EnrollmentUser}","event_source":"{EventSource}","event_module":"{EventModule}","event_category":"{EventCategory}","event_data":"{EventData}","device_friendly_name":"{DeviceFriendlyName}"}}
-
-
+{"ws1":{"source":"WorkspaceONE","event_type":"{EventType}","event":"{Event}","user":"{User}","enrollment_user":"{EnrollmentUser}","event_source":"{EventSource}","event_module":"{EventModule}","event_category":"{EventCategory}","event_data":"{EventData}","device_friendly_name":"{DeviceFriendlyName}"}}
 
 == Test message ==
 
 	 2025-08-12T07:52:34.781548Z AirWatch {"data":{"source":"WorkspaceONE","event_type":"Console","event":"AdminUserLoggedIn","user":"adam.fiser","enrollment_user":"N/A","event_source":"Server","event_module":"Administration","event_category":"Login","event_data":"LoginSessionID=hdxztlajwxno","device_friendly_name":"N/A"}} Event Timestamp: 2025-08-12T07:52:34.265926Z
 
-
 -->
+
 <decoder name="airwatch">
   <prematch>AirWatch</prematch>
 </decoder>
@@ -29,4 +27,3 @@ Message Content:
   <prematch>AirWatch </prematch>
   <plugin_decoder offset="after_prematch">JSON_Decoder</plugin_decoder>
 </decoder>
-
