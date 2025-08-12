@@ -1,0 +1,218 @@
+<!-- 
+Omnissa Workspace One (AirWatch) rules
+
+Author: Adam Fišer
+Source: http://github.com/AdamFiser/siem_templates
+
+  Count ID (reserve >=100 for section):
+    210100–210199  A – Authentication and login
+    210200–210299  B – Configuration/management changes
+    210300–210399  C – Device/profile/application interventions
+    210400–210499  D – General error heuristics
+    210900–210999  Z – Noise suppression (low priority)
+
+  Notes:
+  - All rules are linked via <if_sid> to the section "grouping" rule.
+  - Correlation uses <if_matched_sid> + frequency/timeframe (attributes on <rule>).
+  - Regexes are written conservatively (POSIX classes, without (?i)).
+-->
+
+<group name="workspaceone,airwatch,security,">
+
+  <!-- =========================
+       A) Authentication and login
+       210100–210199
+       ========================= -->
+
+  <!-- A0: Auth group -->
+  <rule id="210100" level="0">
+    <match>AirWatch</match>
+    <description>WS1: Authentication grouping</description>
+  </rule>
+
+  <!-- A1: Failed admin login -->
+  <rule id="210101" level="9">
+    <if_sid>210100</if_sid>
+    <field name="event">AdminUserLoginAttemptFailed</field>
+    <description>Workspace ONE: admin login failed</description>
+    <group>authentication_failed,</group>
+  </rule>
+
+  <!-- A1-korelace: Brute-force 5×/10m -->
+  <rule id="210102" level="12" frequency="5" timeframe="600">
+    <if_matched_sid>210101</if_matched_sid>
+    <description>Workspace ONE: repeated admin login failures (>=5 in 10m)</description>
+    <group>authentication_failures,brute_force,</group>
+  </rule>
+
+  <!-- A2: Successful admin login -->
+  <rule id="210103" level="7">
+    <if_sid>210100</if_sid>
+    <field name="event">AdminUserLoginSuccess</field>
+    <description>Workspace ONE: admin login success</description>
+    <group>authentication_success,</group>
+  </rule>
+
+
+  <!-- =========================
+       B) Configuration/management changes
+       210200–210299
+       ========================= -->
+
+  <!-- B0: Configuration group -->
+  <rule id="210200" level="0">
+    <match>AirWatch</match>
+    <description>WS1: Configuration grouping</description>
+  </rule>
+
+  <!-- B1: Change syslog settings -->
+  <rule id="210210" level="8">
+    <if_sid>210200</if_sid>
+    <field name="event">SyslogSettingChangedSuccess</field>
+    <description>Workspace ONE: syslog settings changed</description>
+    <group>configuration_change,</group>
+  </rule>
+
+  <!-- B2: Changing system settings from the console -->
+  <rule id="210211" level="7">
+    <if_sid>210200</if_sid>
+    <field name="event_category">SystemSettings</field>
+    <field name="event_type">Console</field>
+    <description>Workspace ONE: system settings change from console</description>
+    <group>configuration_change,</group>
+  </rule>
+
+  <!-- B3: Administration actions -->
+  <rule id="210212" level="6">
+    <if_sid>210200</if_sid>
+    <field name="event_module">Administration</field>
+    <description>Workspace ONE: action in Administration module</description>
+    <group>audit,</group>
+  </rule>
+
+
+  <!-- =========================
+       C) Device/profile/application interventions
+       210300–210399
+       ========================= -->
+
+  <!-- C0: Group device/profile/app -->
+  <rule id="210300" level="0">
+    <match>AirWatch</match>
+    <description>WS1: Device/Profile/App grouping</description>
+  </rule>
+
+  <!-- C1: Wipe / Factory reset / Enterprise wipe -->
+  <rule id="210320" level="12">
+    <if_sid>210300</if_sid>
+    <regex>[Ww]ipe|[Ff]actory[[:space:]]*reset|[Ee]nterprise[[:space:]]*wipe</regex>
+    <description>Workspace ONE: device wipe/reset command issued</description>
+    <group>device_control,high_impact,</group>
+  </rule>
+
+  <!-- C2: Device lock/unlock -->
+  <rule id="210321" level="7">
+    <if_sid>210300</if_sid>
+    <regex>[Ll]ock[[:space:]]*Device|[Uu]nlock[[:space:]]*Device</regex>
+    <description>Workspace ONE: device lock/unlock command issued</description>
+    <group>device_control,</group>
+  </rule>
+
+  <!-- C3: profile/policy changes (granularly due to regex reliability) -->
+  <rule id="210330" level="7">
+    <if_sid>210300</if_sid>
+    <regex>[Pp]rofile.*Publish</regex>
+    <description>Workspace ONE: profile publish</description>
+    <group>policy_change,configuration_change,</group>
+  </rule>
+  <rule id="210331" level="7">
+    <if_sid>210300</if_sid>
+    <regex>[Pp]rofile.*Install</regex>
+    <description>Workspace ONE: profile install</description>
+    <group>policy_change,configuration_change,</group>
+  </rule>
+  <rule id="210332" level="7">
+    <if_sid>210300</if_sid>
+    <regex>[Pp]rofile.*Remove|[Pp]rofile.*Uninstall</regex>
+    <description>Workspace ONE: profile remove/uninstall</description>
+    <group>policy_change,configuration_change,</group>
+  </rule>
+  <rule id="210333" level="7">
+    <if_sid>210300</if_sid>
+    <regex>[Pp]olicy.*Change|[Pp]olicy.*Update</regex>
+    <description>Workspace ONE: policy change/update</description>
+    <group>policy_change,configuration_change,</group>
+  </rule>
+
+  <!-- C4: Applications (install/uninstall/update) -->
+  <rule id="210334" level="6">
+    <if_sid>210300</if_sid>
+    <regex>[Aa]pplication[[:space:]]*Install|[Aa]pp[[:space:]]*Install</regex>
+    <description>Workspace ONE: application install</description>
+    <group>app_mgmt,</group>
+  </rule>
+  <rule id="210335" level="6">
+    <if_sid>210300</if_sid>
+    <regex>[Aa]pplication[[:space:]]*Uninstall|[Aa]pp[[:space:]]*Uninstall</regex>
+    <description>Workspace ONE: application uninstall</description>
+    <group>app_mgmt,</group>
+  </rule>
+  <rule id="210336" level="6">
+    <if_sid>210300</if_sid>
+    <regex>[Aa]pplication[[:space:]]*Update|[Aa]pp[[:space:]]*Update</regex>
+    <description>Workspace ONE: application update</description>
+    <group>app_mgmt,</group>
+  </rule>
+
+
+  <!-- =========================
+       D) General error heuristics
+       210400–210499
+       ========================= -->
+
+  <!-- D0: General error -->
+  <rule id="210400" level="0">
+    <match>AirWatch</match>
+    <description>WS1: Errors grouping</description>
+  </rule>
+
+  <!-- D1: Fail/Error -->
+  <rule id="210430" level="8">
+    <if_sid>210400</if_sid>
+    <regex>[Ff]ail|[Ee]rror</regex>
+    <description>Workspace ONE: error/failure detected</description>
+    <group>errors,</group>
+  </rule>
+
+  <!-- D2: Denied/Unauthorized -->
+  <rule id="210431" level="10">
+    <if_sid>210400</if_sid>
+    <regex>[Dd]enied|[Uu]nauthorized|[Pp]ermission[[:space:]]*denied</regex>
+    <description>Workspace ONE: operation denied/unauthorized</description>
+    <group>errors,access_denied,</group>
+  </rule>
+
+
+  <!-- =========================
+       Z) Noise suppression (low priority)
+       210900–210999
+       ========================= -->
+
+  <!-- Z0:  Noise suppression -->
+  <rule id="210500" level="0">
+    <match>AirWatch</match>
+    <description>WS1: Noise grouping</description>
+  </rule>
+
+  <!-- Z1: Heartbeat – comment as needed -->
+  <!--
+  <rule id="210510" level="0">
+    <if_sid>210500</if_sid>
+    <field name="event">Heartbeat</field>
+    <description>Workspace ONE: heartbeat noise</description>
+    <group>noise,</group>
+    <options>no_full_log</options>
+  </rule>
+  -->
+
+</group>
