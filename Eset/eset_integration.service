@@ -1,0 +1,16 @@
+[Unit]
+Description=ESET Detection Fetcher Daemon
+After=network.target
+
+[Service]
+Restart=always
+RestartSec=10
+ExecStart=/usr/bin/python3 /opt/eset_integration/eset_integration.py
+WorkingDirectory=/opt/eset_integration/
+User=root
+Group=root
+StandardOutput=append:/var/log/eset_integration.out.log
+StandardError=append:/var/log/eset_integration.err.log
+
+[Install]
+WantedBy=multi-user.target
